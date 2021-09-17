@@ -8,6 +8,8 @@
 // p5.js Web Editor - Webcam Persistence: https://editor.p5js.org/codingtrain/sketches/Vt9xeTxWJ
 
 // let img;
+
+
 let video;
 let detector;
 let detections = [];
