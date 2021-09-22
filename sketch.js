@@ -1,15 +1,3 @@
-// ml5.js: Object Detection with COCO-SSD (Webcam)
-// The Coding Train / Daniel Shiffman
-// https://thecodingtrain.com/learning/ml5/1.3-object-detection.html
-// https://youtu.be/QEzRxnuaZCk
-
-// p5.js Web Editor - Image: https://editor.p5js.org/codingtrain/sketches/ZNQQx2n5o
-// p5.js Web Editor - Webcam: https://editor.p5js.org/codingtrain/sketches/VIYRpcME3
-// p5.js Web Editor - Webcam Persistence: https://editor.p5js.org/codingtrain/sketches/Vt9xeTxWJ
-
-// let img;
-
-
 let video;
 let detector;
 let detections = [];
@@ -29,8 +17,6 @@ function setup() {
 }
 
 
-
-
 function draw() {
   image(video, 0, 0);
 
@@ -38,14 +24,25 @@ function draw() {
     let object = detections[i];
     if(object.label == 'person')
       continue;
-    stroke(0, 255, 0);
-    strokeWeight(4);
+    if(object.label == 'electronics - hazardous - recyclable - black') {
+      stroke(0);
+    }
+    else if(object.label == 'organic waste - biodegradable - green') {
+      stroke(0, 255, 0);
+    }
+    else {
+      stroke(0, 0, 255);
+    }
+    strokeWeight(5);
+    // don't fill the rectangle with color otherwise object won't be visible
     noFill();
     rect(object.x, object.y, object.width, object.height);
-    noStroke();
+    // Add stroke around text alphabets to enhance visibility
+    stroke(2);
+    // Color of text - white
     fill(255);
     textSize(24);
-    text(object.label, object.x + 10, object.y + 24);
+    text(object.label, object.x + 10, object.y - 24);
   }
 }
 
