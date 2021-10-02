@@ -100,44 +100,44 @@ setTimeout(() => {
         let object = detections[i];
 
         // don't outline person
-        if(object.label == 'person')
-          continue;
-        
-        // outline black, blue and green dustbin wastes
-        // with their respective colors
-        if(object.label == 'electronics - hazardous - recyclable - black') {
+        if(object.label != 'person') {
+
+          // outline black, blue and green dustbin wastes
+          // with their respective colors
+          if(object.label == 'electronics - hazardous - recyclable - black') {
+            p.stroke(0);
+          }
+          else if(object.label == 'organic waste - biodegradable - green') {
+            p.stroke(0, 255, 0);
+          }
+          else {
+            p.stroke(0, 0, 255);
+          }
+          
+          // set thickness of outline
+          p.strokeWeight(5);
+
+          // don't fill the rectangle with color otherwise the object 
+          // won't be visible
+          p.noFill();
+
+          // create the outline around detected object
+          p.rect(object.x, object.y, object.width, object.height);
+
+          // Add a black stroke around text alphabets to 
+          // enhance visibility
           p.stroke(0);
+          p.strokeWeight(3);
+
+          // Color of text - white
+          p.fill(255);
+
+          // set size of text
+          p.textSize(24);
+
+          // display text above the object outline
+          p.text(object.label, object.x + 10, object.y - 24);
         }
-        else if(object.label == 'organic waste - biodegradable - green') {
-          p.stroke(0, 255, 0);
-        }
-        else {
-          p.stroke(0, 0, 255);
-        }
-        
-        // set thickness of outline
-        p.strokeWeight(5);
-
-        // don't fill the rectangle with color otherwise the object 
-        // won't be visible
-        p.noFill();
-
-        // create the outline around detected object
-        p.rect(object.x, object.y, object.width, object.height);
-
-        // Add a black stroke around text alphabets to 
-        // enhance visibility
-        p.stroke(0);
-        p.strokeWeight(3);
-
-        // Color of text - white
-        p.fill(255);
-
-        // set size of text
-        p.textSize(24);
-
-        // display text above the object outline
-        p.text(object.label, object.x + 10, object.y - 24);
       }
     }
     
