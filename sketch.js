@@ -11,6 +11,16 @@ let video;
 let detector;
 let detections = [];
 
+// variables to store dustbin images
+let greenDustbin, blueDustbin, blackDustbin;
+
+// variable to store starting x coord of video elemnent
+// such that video is at center horizontally
+let videoStartingX = (w - 640) / 2;
+
+// dustbin image's starting x coordinate
+let dustbinStartingX = videoStartingX + 650;
+
 // sketch1 (Loader) begins
 // creating sketch1 object as a new p5 object called 'p'
 
@@ -71,18 +81,24 @@ setTimeout(() => {
   let sketch2 = new p5 (p => {
 
     // loading ML5 COCO-SSD Object Detection Model
+    // and dustbin images
     p.preload = () => {
       detector = ml5.objectDetector('cocossd');
+      greenDustbin = p.loadImage('images/dustbin-green.png');
+      blueDustbin = p.loadImage('images/dustbin-blue.png');
+      blackDustbin = p.loadImage('images/dustbin-black.png');
     }
 
     // setting up object detection canvas
     p.setup = () => {
 
-      // create canvas of 640 px by 480 px
-      // create an HTML video element of same size and hide it
+      // create canvas of window.width px by 480 px
+      // so that camera can be placed in center(horizontally)  
+      // without using CSS's margin
+      // create an HTML video element of size 640 px by 480 px and hide it
       // perform object detection on video 
 
-      p.createCanvas(640, 480);
+      p.createCanvas(w, 480);
       video = p.createCapture(p.VIDEO);
       video.size(640, 480);
       video.hide();
@@ -90,9 +106,13 @@ setTimeout(() => {
     }
 
     p.draw = () => {
-
-      // display the video element on canvas
-      p.image(video, 0, 0);
+      
+      // clear the canvas background with a color similar
+      // to web app's background - needed as object.label 
+      // will otherwise stay if it is drawn outside video element
+      // display the video element on canvas at center (horizontally)
+      p.background(40, 54, 96);
+      p.image(video, videoStartingX, 0);
 
       // outline and display label of all the objects 
       // detected
@@ -103,15 +123,19 @@ setTimeout(() => {
         if(object.label != 'person') {
 
           // outline black, blue and green dustbin wastes
-          // with their respective colors
+          // with their respective colors and display corresponding
+          // resized dustbin images so they fit on canvas 
           if(object.label == 'electronics - hazardous - recyclable - black') {
             p.stroke(0);
+            p.image(blackDustbin, dustbinStartingX, 137, 304, 343);
           }
           else if(object.label == 'organic waste - biodegradable - green') {
             p.stroke(0, 255, 0);
+            p.image(greenDustbin, dustbinStartingX, 137, 304, 343);
           }
           else {
             p.stroke(0, 0, 255);
+            p.image(blueDustbin, dustbinStartingX, 137, 304, 343);
           }
           
           // set thickness of outline
@@ -121,8 +145,9 @@ setTimeout(() => {
           // won't be visible
           p.noFill();
 
-          // create the outline around detected object
-          p.rect(object.x, object.y, object.width, object.height);
+          // create the outline around detected object and 
+          // shift this outline as video element is also shifted by videoStartingX
+          p.rect(object.x + videoStartingX, object.y, object.width, object.height);
 
           // Add a black stroke around text alphabets to 
           // enhance visibility
@@ -136,7 +161,8 @@ setTimeout(() => {
           p.textSize(24);
 
           // display text above the object outline
-          p.text(object.label, object.x + 10, object.y - 24);
+          // shift text as video element is shifted
+          p.text(object.label, object.x + videoStartingX + 10, object.y - 24);
         }
       }
     }
