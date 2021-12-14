@@ -14,12 +14,88 @@ let detections = [];
 // variables to store dustbin images
 let greenDustbin, blueDustbin, blackDustbin;
 
-// variable to store starting x coord of video elemnent
-// such that video is at center horizontally
-let videoStartingX = (w - 640) / 2;
+// video parameters
+let videoWidth, videoHeight;
+let videoStartingX;
 
-// dustbin image's starting x coordinate
-let dustbinStartingX = videoStartingX + 650;
+// set videoStartingX's value as soon as videoWidth is set
+function setVideoStartingX() {
+  // center video horizontally for both mobile and laptop 
+  videoStartingX = (w - videoWidth) / 2;
+} 
+// don't shift video vertically on canvas, start at y = 0
+let videoStartingY = 0; 
+
+// canvas parameters
+let canvasWidth  = w, canvasHeight;
+
+// variable for front camera/rear camera option
+var cameraChoice;
+
+// text parameters
+let fontSize;
+let fontOutline;
+let textDisplacementY; // textDisplacememtX is same for mobile and PC 
+
+// thickness of bounding box
+let boxWeight;
+
+// dustbin parameters
+let dustbinStartingX, dustbinStartingY;
+let dustbinWidth, dustbinHeight;
+
+// parameters for mobile screen
+if(w < 768) {
+  canvasHeight = h;
+  videoWidth = 360;
+  // set videoStartingX's value as dustbinStartingX requires it later
+  setVideoStartingX();
+  videoHeight = 480;
+  cameraChoice = {
+    video: {
+      facingMode: {
+        exact: "environment"
+      }
+    }
+  };
+
+  dustbinWidth = 200;
+  dustbinHeight = 224;
+  // make canvas appear from top to bottom 
+  document.querySelector("body").style.alignItems = "start";
+  dustbinStartingX = 0;
+  // dustbin image always leaves 10px gap at bottom  
+  dustbinStartingY = h - dustbinHeight - 10;
+  fontSize = 14;
+  fontOutline = 2;
+  boxWeight = 4;
+  textDisplacementY = 10;
+
+} else {
+  // parameters for laptop screen
+  canvasHeight = 480;
+  videoWidth = 640;
+  setVideoStartingX();
+  videoHeight = 480;
+  cameraChoice = {
+    video: {
+      facingMode: {
+        exact: "user"
+      }
+    }
+  };
+  
+  dustbinWidth = 304;
+  dustbinHeight = 343;
+  // shift dustbin image horizontally towards the right of video
+  dustbinStartingX = videoStartingX + videoWidth + 10;
+  // start dustbin image 137 px below where video starts (which starts at y = 0)
+  dustbinStartingY = videoStartingY + 137;
+  fontSize = 24;
+  fontOutline = 3;
+  boxWeight = 5;
+  textDisplacementY = 24;
+}
 
 // sketch1 (Loader) begins
 // creating sketch1 object as a new p5 object called 'p'
@@ -98,9 +174,9 @@ setTimeout(() => {
       // create an HTML video element of size 640 px by 480 px and hide it
       // perform object detection on video 
 
-      p.createCanvas(w, 480);
-      video = p.createCapture(p.VIDEO);
-      video.size(640, 480);
+      p.createCanvas(canvasWidth, canvasHeight);
+      video = p.createCapture(cameraChoice);
+      video.size(videoWidth, videoHeight);
       video.hide();
       detector.detect(video, p.gotDetections);
     }
@@ -112,7 +188,7 @@ setTimeout(() => {
       // will otherwise stay if it is drawn outside video element
       // display the video element on canvas at center (horizontally)
       p.background(40, 54, 96);
-      p.image(video, videoStartingX, 0);
+      p.image(video, videoStartingX, videoStartingY);
 
       // outline and display label of all the objects 
       // detected
@@ -127,19 +203,19 @@ setTimeout(() => {
           // resized dustbin images so they fit on canvas 
           if(object.label == 'electronics - hazardous - recyclable - black') {
             p.stroke(0);
-            p.image(blackDustbin, dustbinStartingX, 137, 304, 343);
+            p.image(blackDustbin, dustbinStartingX, dustbinStartingY, dustbinWidth, dustbinHeight);
           }
           else if(object.label == 'organic waste - biodegradable - green') {
             p.stroke(0, 255, 0);
-            p.image(greenDustbin, dustbinStartingX, 137, 304, 343);
+            p.image(greenDustbin, dustbinStartingX, dustbinStartingY, dustbinWidth, dustbinHeight);
           }
           else {
             p.stroke(0, 0, 255);
-            p.image(blueDustbin, dustbinStartingX, 137, 304, 343);
+            p.image(blueDustbin, dustbinStartingX, dustbinStartingY, dustbinWidth, dustbinHeight);
           }
           
           // set thickness of outline
-          p.strokeWeight(5);
+          p.strokeWeight(boxWeight);
 
           // don't fill the rectangle with color otherwise the object 
           // won't be visible
@@ -147,22 +223,23 @@ setTimeout(() => {
 
           // create the outline around detected object and 
           // shift this outline as video element is also shifted by videoStartingX
+          // but dont shift y coordinate as video is not shifted vertically in canvas
           p.rect(object.x + videoStartingX, object.y, object.width, object.height);
 
           // Add a black stroke around text alphabets to 
           // enhance visibility
           p.stroke(0);
-          p.strokeWeight(3);
+          p.strokeWeight(fontOutline);
 
           // Color of text - white
           p.fill(255);
 
           // set size of text
-          p.textSize(24);
+          p.textSize(fontSize);
 
           // display text above the object outline
           // shift text as video element is shifted
-          p.text(object.label, object.x + videoStartingX + 10, object.y - 24);
+          p.text(object.label, object.x + videoStartingX + 10, object.y - textDisplacementY);
         }
       }
     }
@@ -183,9 +260,3 @@ setTimeout(() => {
     }
   });
 }, 6630);
-
-
-
-
-
-
